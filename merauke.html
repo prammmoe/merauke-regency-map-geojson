@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Merauke Regency Map</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" integrity="sha384-xPl1/EkT1+9X/b0oGLhTllT8TUKsL3mEmQ2cEiMTPlmPG1pIYoZucRmZTnBHDThN" crossorigin="" />
+    <style>
+      #map {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js" integrity="sha384-NwqvUz0vfUoA6UzCETsrMq3XNF2QbUL0I5jD1SxQegPVJChX/N+O5gg5j5wkr4OF" crossorigin=""></script>
+    <script>
+      // Load GeoJSON data
+      fetch('https://raw.githubusercontent.com/afifbasya/GeoJSON-Data/main/Merauke.geojson')
+        .then((response) => response.json())
+        .then((data) => {
+          // Create map
+          const map = L.map('map').setView([-8.4822, 140.4059], 11);
+
+          // Add tile layer
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+          }).addTo(map);
+
+          // Add GeoJSON layer
+          L.geoJSON(data, {
+            style: function (feature) {
+              return {
+                fillColor: '#e41a1c',
+                weight: 1,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.7,
+              };
+            },
+            onEachFeature: function (feature, layer) {
+              layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: zoomToFeature,
+              });
+            },
+          }).addTo(map);
+
+          // Define functions for styling and interaction
+          function highlightFeature(e) {
+            const layer = e.target;
+
+            layer.setStyle({
+              weight: 2,
+              color: '#666',
+              dashArray: '',
+              fillOpacity: 0.7,
+            });
+
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+              layer.bringToFront();
+            }
+          }
+
+          function resetHighlight(e) {
+            const layer = e.target;
+
+            layer.setStyle({
+              weight: 1,
+              color: 'white',
+              fillOpacity: 0.7,
+            });
+          }
+
+          function zoomToFeature(e) {
+            map.fitBounds(e.target.getBounds());
+          }
+        });
+    </script>
+  </body>
+</html>
